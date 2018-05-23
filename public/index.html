@@ -30,6 +30,10 @@
             }
         });
 
+        socket.on('disconnected', function(){
+            socket.emit('del_user', clientid);
+        });
+
         function getLocation(){
                 jQuery.post( "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBQVO1VBB3f_XRhuuSGVi8kaFFkRRognpc", function(position)
                 {
