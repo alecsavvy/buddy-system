@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<title>496 Project</title>
+</head>
+<body>
+    <div id="server-time">Welcome!</div>
+</body>
+<script>
+        var socket = io();
+        var el = document.getElementById('server-time');
+    
+        socket.on('time', function(timeString){
+            if (!timeString){
+                el.innerHTML = 'Server time: Loading...';
+            } else {
+                el.innerHTML = 'Server time: ' + timeString;
+            }
+    }   );
+    </script>
+</html>
