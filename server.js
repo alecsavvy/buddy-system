@@ -11,9 +11,16 @@ const server = express()
 
 const io = socketIO(server);
 
+var users = {}
+counter = 0
+
 io.on('connection', (socket) => {
-    console.log('Client connected');
-    socket.on('disconnect', () => console.log('Client disconnected'));
+    userkey = Date.now();
+    users[userkey] = counter;
+    counter += 1;
+    var log = `Client `+ counter +` connected`
+    console.log(log);
+    socket.on('disconnect', () => console.log('Client' + users[userkey] +' disconnected'));
 });
 
 setInterval(() => io.emit('time', new Date().toString()), 1000);
