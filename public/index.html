@@ -6,17 +6,49 @@
 </head>
 <body>
     <div id="server-time">Welcome!</div>
+    <div>
+        <div id="client-id">No id yet!</div>
+        <div id="client-coords">No latitude yet!</div>
+    </div>
 </body>
 <script>
         var socket = io();
         var el = document.getElementById('server-time');
-    
+        var currentLocation = "cannot find location";
+        var clientid = null;
+
+        socket.on('user', function(userid){
+            clientid = userid;
+            document.getElementById('client-id').innerHTML = userid;
+        });
         socket.on('time', function(timeString){
             if (!timeString){
                 el.innerHTML = 'Server time: Loading...';
             } else {
                 el.innerHTML = 'Server time: ' + timeString;
             }
-    }   );
+        });
+
+        function getLocation(){
+            if(navigator.geolocation){
+                navigator.geolocation.getCurrentPosition(function(position){
+                    pos = position.coords
+
+                    document.getElementById('client-coords').innerHTML = "Latitude: " + pos.latitude + 
+                            "<br>Longitude: " + pos.longitude; 
+
+                    var currentLocation = {
+                        id: clientid,
+                        lat: pos.latitude,
+                        lng: pos.longitude
+                    }
+                    socket.emit('loc', currentLocation);
+                });
+            }else{
+                alert("Error: Can't find current location.");
+            }
+        }
+
+        setInterval(getLocation, 10000);
     </script>
 </html>
