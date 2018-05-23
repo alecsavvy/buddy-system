@@ -30,7 +30,7 @@
             }
         });
 
-        socket.on('disconnected', function(){
+        socket.on('disconnect', function(){
             socket.emit('del_user', clientid);
         });
 
