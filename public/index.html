@@ -2,6 +2,7 @@
 <html>
 <head>
 <script src="/socket.io/socket.io.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <title>496 Project</title>
 </head>
 <body>
@@ -30,24 +31,26 @@
         });
 
         function getLocation(){
-            if(navigator.geolocation){
-                navigator.geolocation.getCurrentPosition(function(position){
-                    pos = position.coords
+                jQuery.post( "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBQVO1VBB3f_XRhuuSGVi8kaFFkRRognpc", function(position)
+                {
+                    pos = position.location
 
-                    document.getElementById('client-coords').innerHTML = "Latitude: " + pos.latitude + 
-                            "<br>Longitude: " + pos.longitude; 
+                    document.getElementById('client-coords').innerHTML = "Latitude: " + pos.lat + 
+                            "<br>Longitude: " + pos.lng; 
 
                     var currentLocation = {
                         id: clientid,
-                        lat: pos.latitude,
-                        lng: pos.longitude
+                        lat: pos.lat,
+                        lng: pos.lng
                     }
                     socket.emit('loc', currentLocation);
-                });
-            }else{
-                alert("Error: Can't find current location.");
-            }
-        }
+                }
+            )
+                .fail(function(err) {
+                alert("API Geolocation error! \n\n"+err);
+        });
+};
+        
 
         setInterval(getLocation, 10000);
     </script>
