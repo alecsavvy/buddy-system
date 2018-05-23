@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
         console.log('User: ' + location.id);
         console.log('at: ' + users[location.id]['currentLocation']['latitude'] + ', ' + users[location.id]['currentLocation']['longitude'])
     });
-    socket.on('disconnect', () => console.log('Client disconnected'));
+    socket.on('disconnect', () => console.log(userid + ' disconnected'));
 });
 
 function loginUser(id){
