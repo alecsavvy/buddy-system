@@ -59,6 +59,8 @@
             socket.emit('del_user', clientid);
         }
 
+        window.addEventListener("pagehide", onDisconnect, false);
+
         setInterval(getLocation, 10000);
     </script>
 </html>
