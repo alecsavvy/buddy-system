@@ -30,14 +30,14 @@
             }
         });
 
-        socket.on('disconnect', function(){
+        socket.on('disconnect', () => {
             socket.emit('del_user', clientid);
         });
 
         function getLocation(){
                 jQuery.post( "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBQVO1VBB3f_XRhuuSGVi8kaFFkRRognpc", function(position)
                 {
-                    pos = position.location
+                    pos = position.location;
 
                     document.getElementById('client-coords').innerHTML = "Latitude: " + pos.lat + 
                             "<br>Longitude: " + pos.lng; 
@@ -54,7 +54,10 @@
                 alert("API Geolocation error! \n\n"+err);
         });
 };
-        
+        window.onbeforeunload = onDisconnect;
+        function onDisconnect(){
+            socket.emit('del_user', clientid);
+        }
 
         setInterval(getLocation, 10000);
     </script>
