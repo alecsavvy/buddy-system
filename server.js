@@ -50,3 +50,6 @@ function loginUser(id){
 }
 
 setInterval(() => io.emit('time', new Date().toString()), 1000);
+setInterval(() => io.emit('broadcast_users', users), 5000);
+setInterval(() => {console.log(users)}, 5000);
+
