@@ -6,15 +6,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>496 Project</title>
 </head>
-<body>
-    <div id="server-time">Welcome!</div>
-    <div>
+<body style="background-color: steelblue;">
+    <div style="
+    margin: auto;
+    width: 52%;
+    padding-bottom: 10px;
+    text-align: center;
+    ">
+        <div style="
+        font-size: 40px;
+        background-color: white;
+        color: steelblue;
+        ">Let's use the Buddy System!</div>
+    </div>
+    <div style="
+    margin: auto;
+    width: 50%;
+    border: 3px solid white;
+    padding: 10px;
+    text-align: center;
+    color: white;
+    ">
         <div id="client-id">No id yet!</div>
         <div id="client-coords">No coords yet!</div>
-        <div id="map" style="width: 600px; height: 400px;"></div>
+        <div id="map" style="width: 600px; height: 400px; display: inline-block"></div>
     </div>
-    <button id="button" onclick="findOthers()">Find others!</button>
-    <div id="user-table">No users yet!</div>
+    <div style="
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+    text-align: center;
+    color: white;
+    ">
+        <button id="button" onclick="findOthers()">Find others!</button>
+        <div id="server-time">Welcome!</div>
+        <div id="user-table">No users yet!</div>
+    </div>
 </body>
 <script>
         var socket = io();
