@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+   integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+   crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+crossorigin=""></script>
+<title>496 Project</title>
+</head>
+<body>
+    <div id="server-time">Welcome!</div>
+    <div>
+        <div id="client-id">No id yet!</div>
+        <div id="client-coords">No coords yet!</div>
+        <div id="map" style="width: 600px; height: 400px;"></div>
+    </div>
+    <div id="user-table">No users yet!</div>
+</body>
+<script>
+        var socket = io();
+        var el = document.getElementById('server-time');
+        var currentLocation = "cannot find location";
+        var clientid = null;
+        var all_users = {};
+
+        // MAP
+       	var map = L.map('map').fitWorld();
+
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox.streets'
+        }).addTo(map);
+
+        function onLocationFound(e) {
+            var radius = e.accuracy / 2;
+
+            L.marker(e.latlng).addTo(map)
+                .bindPopup("You are within " + radius + " meters from this point").openPopup();
+
+            L.circle(e.latlng, radius).addTo(map);
+        }
+
+        function onLocationError(e) {
+            alert(e.message);
+        }
+
+        map.on('locationfound', onLocationFound);
+        //map.on('locationerror', onLocationError);
+
+        map.locate({setView: true, maxZoom: 16});
+        
+        // END MAP
+
+        // CLIENT SOCKETS
+        socket.on('user', function(userid){
+            clientid = userid;
+            document.getElementById('client-id').innerHTML = userid;
+        });
+        socket.on('time', function(timeString){
+            if (!timeString){
+                el.innerHTML = 'Server time: Loading...';
+            } else {
+                el.innerHTML = 'Server time: ' + timeString;
+            }
+        });
+
+        socket.on('broadcast_users', function(users){
+            console.log(users);
+            // Users have not moved.
+            if (users == all_users){
+                console.log("no change in users");
+            }else {
+                // Some user has moved and the map updates, clears layer and redraws.
+                createTable()
+                L.layerGroup().clearLayers();
+                for (var id in users) {
+                    loc = users[id]['currentLocation']
+                    L.marker([loc['latitude'], loc['longitude']]).addTo(map)
+                        .bindPopup("User: " + id)
+                        .openPopup();
+                }
+            }
+        })
+
+        socket.on('disconnect', () => {
+            socket.emit('del_user', clientid);
+        });
+
+        // END CLIENT SOCKETS
+
+        // GET LOCATION
+        function getLocation(){
+                jQuery.post( "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBQVO1VBB3f_XRhuuSGVi8kaFFkRRognpc", function(position)
+                {
+                    pos = position.location;
+
+                    document.getElementById('client-coords').innerHTML = "Latitude: " + pos.lat + 
+                            "<br>Longitude: " + pos.lng; 
+
+                    var currentLocation = {
+                        id: clientid,
+                        lat: pos.lat,
+                        lng: pos.lng
+                    }
+                    socket.emit('loc', currentLocation);
+                }
+            )
+                .fail(function(err) {
+                alert("API Geolocation error! \n\n"+err);
+        });
+    };
+
+        // CREATE USER TABLE
+        function createTable(new_users){
+            tab = document.getElementById('user-table').innerHTML;
+            tab = "Updating user table...";
+            content = "";
+            for (var id in new_users){
+                console.log(id)
+                loc = new_users[id]['currentLocation']
+                row = "<br> User: " + id + " at: </br>" +
+                "<br>Latitude: " + loc['latitude'] + "</br>" +
+                "<br>Longitude: " + loc['longitude'];
+                content += row;
+            }
+            document.getElementById('user-table').innerHTML = content;
+        };
+
+        // ON PAGE CLOSE
+        window.addEventListener("pagehide", function(){
+            socket.emit('del_user', clientid)
+        }, false);
+
+        setInterval(getLocation, 10000);
+        setInterval(console.log(users), 5000);
+    </script>
+</html>
